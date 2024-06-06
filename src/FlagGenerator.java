@@ -74,75 +74,59 @@ public class FlagGenerator extends JPanel {
 	}
 
 	private Palette getRandomColor(Set<Integer> usedColorIndices) {
-		int colorIndex;
-		do {
-			colorIndex = random.nextInt(Palette.values().length);
-		} while (!usedColorIndices.add(colorIndex));
+		final int colorIndex = Palette.getRandomIndex(random, usedColorIndices);
+		usedColorIndices.add(colorIndex);
 		return Palette.values()[colorIndex];
 	}
-	
+
 	public Flag createRandomFlag(int height) {
-		final int width = (int) (height * Math.min(2, Math.max(1, 2.5 - Math.abs(random.nextGaussian())))); 
 		final Set<Integer> usedColorIndices = new HashSet<>();
+		final FlagPattern pattern = FlagPattern.getRandomPattern(random);
+		return createRandomFlag(height, usedColorIndices, pattern);
+	}
+
+	public Flag createRandomFlag(int height, Set<Integer> usedColorIndices, FlagPattern pattern) {
+		final int width = (int) (height * Math.min(2, Math.max(1, 2.5 - Math.abs(random.nextGaussian()))));
 		final Flag flag = new Flag(width, height, getRandomColor(usedColorIndices).color);
-		final int symmetry = random.nextInt(11);
-		if (symmetry == 0) {
-			// Diagonal symmetry line
-			final int pattern = random.nextInt(2);
-			if (pattern == 0) {
-				double w = 0.1;
-				final Color color1 = getRandomColor(usedColorIndices).color;
-				flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color1);
-				flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color1);
-				if (random.nextInt(2) == 0) {
-					w = 0.13;
-					final Color color2 = getRandomColor(usedColorIndices).color;
-					flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color2);
-					flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color2);					
+		switch (pattern) {
+			case EMPTY -> {
+				// Add random left triangle
+				if (random.nextInt(10) < 2) {
+					final double midX = (random.nextInt(2) + 4) / 10.0;
+					flag.addTriangle(Flag.Alignment.LEFT, 0, 1, midX, 0.5, getRandomColor(usedColorIndices).color);
+				} else {
+					flag.addCircle(0.5, 0.5, 0.5, getRandomColor(usedColorIndices).color);
 				}
-			} else {
-				double w = 0.1;
-				final Color color1 = getRandomColor(usedColorIndices).color;
-				flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color1);
-				flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color1);
-				if (random.nextInt(2) == 0) {
-					w = 0.13;
-					final Color color2 = getRandomColor(usedColorIndices).color;
-					flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color1);
-					flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color1);					
-				}				
 			}
-		} else if (symmetry == 1) {
-			// Empty flag
-			flag.addCircle(0.5, 0.5, 0.5, getRandomColor(usedColorIndices).color);
-		} else if (symmetry < 5) {
-			// Horizontal symmetry line
-			final int pattern = random.nextInt(8);
-			if (pattern == 0) {
-				// Nordic Cross
-				final Color color = getRandomColor(usedColorIndices).color;
-				final double midX = (random.nextInt(2) + 4) / 10.0;
-				final double crossWidth = 0.1;
-				final double verticalStripeWidth = crossWidth * height / width; 
-				flag.addVerticalStripe(midX - verticalStripeWidth, midX + verticalStripeWidth, color);
-				flag.addHorizontalStripe(0.5 - crossWidth, 0.5 + crossWidth, color);
-			} else if (pattern < 3) {
-				// 2 vertical stripes
-				flag.addVerticalStripe(0, 0.5, getRandomColor(usedColorIndices).color);
-				flag.addCircle(0.5, 0.5, 0.5, getRandomColor(usedColorIndices).color);
-			} else {
-				// 3 vertical stripes
+			case TWO_HORIZONTAL_STRIPES -> {
+				flag.addHorizontalStripe(0, 0.5, getRandomColor(usedColorIndices).color);
+				if (random.nextInt(10) < 2) {
+					final double midX = (random.nextInt(2) + 4) / 10.0;
+					flag.addTriangle(Flag.Alignment.LEFT, 0, 1, midX, 0.5, getRandomColor(usedColorIndices).color);
+				}
+			}
+			case THREE_HORIZONTAL_STRIPES -> {
 				Color color = getRandomColor(usedColorIndices).color;
-				flag.addVerticalStripe(0, 0.33, color);
+				flag.addHorizontalStripe(0, 0.33, color);
 				if (random.nextInt(3) != 0) {
 					color = getRandomColor(usedColorIndices).color;
+				} else if (random.nextInt(3) == 0) {
+					final Color color2 = getRandomColor(usedColorIndices).color;
+					flag.addHorizontalStripe(0.64, 0.67, color2);
+					flag.addHorizontalStripe(0.33, 0.36, color2);
 				}
-				flag.addVerticalStripe(0.67, 1, color);
+				flag.addHorizontalStripe(0.67, 1, color);
+				if (random.nextInt(10) < 2) {
+					final double midX = (random.nextInt(2) + 4) / 10.0;
+					flag.addTriangle(Flag.Alignment.LEFT, 0, 1, midX, 0.5, getRandomColor(usedColorIndices).color);
+				}
 			}
-		} else {
-			// Vertical symmetry line
-			final int stripePattern = random.nextInt(10);
-			if (stripePattern == 0 && height == flagHeight) {
+			case FOUR_HORIZONTAL_STRIPES -> {
+				flag.addHorizontalStripe(0, 0.5, getRandomColor(usedColorIndices).color);
+				flag.addHorizontalStripe(0, 0.25, getRandomColor(usedColorIndices).color);
+				flag.addHorizontalStripe(0.75, 1, getRandomColor(usedColorIndices).color);
+			}
+			case MANY_HORIZONTAL_STRIPES -> {
 				// Many horizontal stripes with alternating colors
 				final int amount = random.nextInt(3) + 3;
 				final double size = 0.5 / amount;
@@ -150,24 +134,63 @@ public class FlagGenerator extends JPanel {
 				for (int i = 0; i < amount; ++i) {
 					flag.addHorizontalStripe(i * 2 * size, (i * 2 + 1) * size, color);
 				}
-				final Flag topLeft = createRandomFlag(height / 3);
+				final FlagPattern pattern2 = random.nextInt(3) == 0 ? FlagPattern.NORDIC_CROSS : FlagPattern.EMPTY;
+				final Flag topLeft = createRandomFlag(height / 3, usedColorIndices, pattern2);
 				flag.addSubFlag(topLeft, 0, 0);
-			} else if (stripePattern < 4) {
-				// 2 horizontal stripes
-				flag.addHorizontalStripe(0, 0.5, getRandomColor(usedColorIndices).color);
-			} else {
-				// 3 horizontal stripes
+			}
+			case TWO_VERTICAL_STRIPES -> {
+				flag.addVerticalStripe(0, 0.5, getRandomColor(usedColorIndices).color);
+				flag.addCircle(0.5, 0.5, 0.5, getRandomColor(usedColorIndices).color);
+			}
+			case THREE_VERTICAL_STRIPES -> {
 				Color color = getRandomColor(usedColorIndices).color;
-				flag.addHorizontalStripe(0, 0.33, color);
+				flag.addVerticalStripe(0, 0.33, color);
 				if (random.nextInt(3) != 0) {
 					color = getRandomColor(usedColorIndices).color;
 				}
-				flag.addHorizontalStripe(0.67, 1, color);
+				flag.addVerticalStripe(0.67, 1, color);
 			}
-			// Add random left triangle
-			if (stripePattern != 0 && random.nextInt(10) < 2) {
+			case NORDIC_CROSS -> {
 				final double midX = (random.nextInt(2) + 4) / 10.0;
-				flag.addTriangle(Flag.Alignment.LEFT, 0, 1, midX, 0.5, getRandomColor(usedColorIndices).color);
+				if (random.nextInt(2) == 0) {
+					final Color color2 = getRandomColor(usedColorIndices).color;
+					final double crossWidth2 = 0.13;
+					final double verticalStripeWidth2 = crossWidth2 * height / width;
+					flag.addVerticalStripe(midX - verticalStripeWidth2, midX + verticalStripeWidth2, color2);
+					flag.addHorizontalStripe(0.5 - crossWidth2, 0.5 + crossWidth2, color2);
+				}
+				final Color color = getRandomColor(usedColorIndices).color;
+				final double crossWidth = 0.1;
+				final double verticalStripeWidth = crossWidth * height / width;
+				flag.addVerticalStripe(midX - verticalStripeWidth, midX + verticalStripeWidth, color);
+				flag.addHorizontalStripe(0.5 - crossWidth, 0.5 + crossWidth, color);
+			}
+			case DIAGONAL_STRIPES -> {
+				final int pattern2 = random.nextInt(3);
+				final boolean edges = random.nextInt(2) == 0;
+				if (pattern2 == 0) {
+					double w = 0.1;
+					final Color color1 = getRandomColor(usedColorIndices).color;
+					flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color1);
+					flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color1);
+					if (edges) {
+						w = 0.13;
+						final Color color2 = getRandomColor(usedColorIndices).color;
+						flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color2);
+						flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color2);
+					}
+				} else {
+					double w = 0.1;
+					final Color color1 = getRandomColor(usedColorIndices).color;
+					flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color1);
+					flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color1);
+					if (edges) {
+						w = 0.13;
+						final Color color2 = getRandomColor(usedColorIndices).color;
+						flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color2);
+						flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color2);
+					}
+				}
 			}
 		}
 		return flag;
