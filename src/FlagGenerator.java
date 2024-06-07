@@ -114,14 +114,15 @@ public class FlagGenerator extends JPanel {
 				}
 			}
 			case THREE_HORIZONTAL_STRIPES -> {
+				if (random.nextInt(3) == 0) {
+					final Color color2 = getRandomColor(usedColorIndices).color;
+					flag.addHorizontalStripe(0.64, 1, color2);
+					flag.addHorizontalStripe(0, 0.36, color2);
+				}
 				Color color = getRandomColor(usedColorIndices).color;
 				flag.addHorizontalStripe(0, 0.33, color);
 				if (random.nextInt(3) != 0) {
 					color = getRandomColor(usedColorIndices).color;
-				} else if (random.nextInt(3) == 0) {
-					final Color color2 = getRandomColor(usedColorIndices).color;
-					flag.addHorizontalStripe(0.64, 0.67, color2);
-					flag.addHorizontalStripe(0.33, 0.36, color2);
 				}
 				flag.addHorizontalStripe(0.67, 1, color);
 				if (random.nextInt(10) < 2) {
@@ -159,16 +160,16 @@ public class FlagGenerator extends JPanel {
 				flag.addVerticalStripe(0.67, 1, color);
 			}
 			case NORDIC_CROSS -> {
+				double crossWidth = 0.08 + random.nextDouble() * 0.04;
 				final double midX = (random.nextInt(2) + 4) / 10.0;
 				if (random.nextInt(2) == 0) {
 					final Color color2 = getRandomColor(usedColorIndices).color;
-					final double crossWidth2 = 0.13;
+					final double crossWidth2 = crossWidth + random.nextDouble() * 0.01 + 0.02;
 					final double verticalStripeWidth2 = crossWidth2 * height / width;
 					flag.addVerticalStripe(midX - verticalStripeWidth2, midX + verticalStripeWidth2, color2);
 					flag.addHorizontalStripe(0.5 - crossWidth2, 0.5 + crossWidth2, color2);
 				}
 				final Color color = getRandomColor(usedColorIndices).color;
-				final double crossWidth = 0.1;
 				final double verticalStripeWidth = crossWidth * height / width;
 				flag.addVerticalStripe(midX - verticalStripeWidth, midX + verticalStripeWidth, color);
 				flag.addHorizontalStripe(0.5 - crossWidth, 0.5 + crossWidth, color);
@@ -177,26 +178,74 @@ public class FlagGenerator extends JPanel {
 				final int pattern2 = random.nextInt(3);
 				final boolean edges = random.nextInt(2) == 0;
 				if (pattern2 == 0) {
-					double w = 0.1;
+					double w = 0.05 + random.nextDouble() * 0.05;
+					double z = w;
+					switch (random.nextInt(3)) {
+						case 0:
+							break;
+						case 1:
+							w *= 2;
+							z = 0;
+							break;
+						case 2:
+							w = 0;
+							z *= 2;
+							break;
+					}
 					final Color color1 = getRandomColor(usedColorIndices).color;
-					flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color1);
-					flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color1);
+					flag.addTriangle(Flag.Alignment.LEFT, z, 1, 1 - w, 1, color1);
+					flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - z, 1 - w, 0, color1);
 					if (edges) {
-						w = 0.13;
+						final double d = 0.02 + random.nextDouble() * 0.01;
+						w += d;
+						z += d;
 						final Color color2 = getRandomColor(usedColorIndices).color;
-						flag.addTriangle(Flag.Alignment.LEFT, w, 1, 1 - w, 1, color2);
-						flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - w, 1 - w, 0, color2);
+						flag.addTriangle(Flag.Alignment.LEFT, z, 1, 1 - w, 1, color2);
+						flag.addTriangle(Flag.Alignment.RIGHT, 0, 1 - z, 1 - w, 0, color2);
+					}
+				} else if (pattern2 == 1) {
+					double w = 0.05 + random.nextDouble() * 0.05;
+					double z = w;
+					switch (random.nextInt(3)) {
+						case 0:
+							break;
+						case 1:
+							w *= 2;
+							z = 0;
+							break;
+						case 2:
+							w = 0;
+							z *= 2;
+							break;
+					}
+					final Color color1 = getRandomColor(usedColorIndices).color;
+					flag.addTriangle(Flag.Alignment.RIGHT, z, 1, 1 - w, 1, color1);
+					flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - z, 1 - w, 0, color1);
+					if (edges) {
+						final double d = 0.02 + random.nextDouble() * 0.01;
+						w += d;
+						z += d;
+						final Color color2 = getRandomColor(usedColorIndices).color;
+						flag.addTriangle(Flag.Alignment.RIGHT, z, 1, 1 - w, 1, color2);
+						flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - z, 1 - w, 0, color2);
 					}
 				} else {
-					double w = 0.1;
+					double w = 0.05 + random.nextDouble() * 0.05;
 					final Color color1 = getRandomColor(usedColorIndices).color;
-					flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color1);
-					flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color1);
+					flag.addTriangle(Flag.Alignment.RIGHT, w, 1 - w, 0.5 - w, 0.5, color1);
+					flag.addTriangle(Flag.Alignment.LEFT, w, 1 - w, 0.5 - w, 0.5, color1);
+					flag.addTriangle(Flag.Alignment.TOP, w, 1 - w, 0.5, 0.5 - w, color1);
+					flag.addTriangle(Flag.Alignment.BOTTOM, w, 1 - w, 0.5, 0.5 - w, color1);
 					if (edges) {
-						w = 0.13;
-						final Color color2 = getRandomColor(usedColorIndices).color;
-						flag.addTriangle(Flag.Alignment.RIGHT, w, 1, 1 - w, 1, color2);
-						flag.addTriangle(Flag.Alignment.LEFT, 0, 1 - w, 1 - w, 0, color2);
+						w += 0.02 + random.nextDouble() * 0.01;
+						Color color2 = getRandomColor(usedColorIndices).color;
+						flag.addTriangle(Flag.Alignment.RIGHT, w, 1 - w, 0.5 - w, 0.5, color2);
+						flag.addTriangle(Flag.Alignment.LEFT, w, 1 - w, 0.5 - w, 0.5, color2);
+						if (random.nextInt(2) == 0) {
+							color2 = getRandomColor(usedColorIndices).color;
+						}
+						flag.addTriangle(Flag.Alignment.TOP, w, 1 - w, 0.5, 0.5 - w, color2);
+						flag.addTriangle(Flag.Alignment.BOTTOM, w, 1 - w, 0.5, 0.5 - w, color2);
 					}
 				}
 			}
