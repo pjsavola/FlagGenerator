@@ -35,17 +35,32 @@ public class FlagGenerator extends JPanel {
 	private Set<String> usedHorizontalColors = new HashSet<>();
 	private Set<String> usedVerticalColors = new HashSet<>();
 	private final List<Flag> remainingFlags = new ArrayList<>();
+	private final List<Flag> currentFlags = new ArrayList<>();
 
 	public FlagGenerator() {
 		FlagLibrary.createFlags(flagHeight);
 		remainingFlags.addAll(FlagLibrary.realFlags.values());
+		updateFlags();
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
 		return size;
 	}
-	
+
+	public void updateFlags() {
+		currentFlags.clear();
+		for (int i = 0; i < flagCount; ++i) {
+			final Flag flag;
+			if (remainingFlags.isEmpty()) {
+				flag = createRandomFlag(flagHeight);
+			} else {
+				flag = remainingFlags.remove(0);
+			}
+			currentFlags.add(flag);
+		}
+	}
+
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -54,14 +69,7 @@ public class FlagGenerator extends JPanel {
 		g.fillRect(0, 0, size.width, size.height);
 		int column = 0;
 		int row = 0;
-		for (int i = 0; i < flagCount; ++i) {
-			final Flag flag;
-			if (remainingFlags.isEmpty()) {
-				flag = createRandomFlag(flagHeight);
-			} else {
-				flag = remainingFlags.remove(0);
-			}
-
+		for (final Flag flag : currentFlags) {
 			final int x = column * (flagWidth + marginSize) + marginSize;
 			final int y = row * (flagHeight + marginSize) + marginSize;
 			final int spacingX = (flagWidth - flag.getWidth()) / 2;
@@ -198,7 +206,7 @@ public class FlagGenerator extends JPanel {
 
 	public static void main(String[] args) {
 
-		final JPanel g = new FlagGenerator();
+		final FlagGenerator g = new FlagGenerator();
 		final JFrame f = new JFrame("Flag Generator");
 		f.setContentPane(g);
 		f.pack();
@@ -211,6 +219,7 @@ public class FlagGenerator extends JPanel {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					g.updateFlags();
 					g.repaint();
 				}
 			}
