@@ -114,17 +114,36 @@ public class FlagGenerator extends JPanel {
 				}
 			}
 			case THREE_HORIZONTAL_STRIPES -> {
-				if (random.nextInt(3) == 0) {
-					final Color color2 = getRandomColor(usedColorIndices).color;
-					flag.addHorizontalStripe(0.64, 1, color2);
-					flag.addHorizontalStripe(0, 0.36, color2);
+				double topSize = 0.33;
+				double bottomSize = 0.33;
+				final double p = random.nextDouble();
+				if (p < 0.02) {
+					bottomSize = 0.5;
+					topSize = 0.25;
+				} else if (p < 0.06) {
+					bottomSize = 0.25;
+					topSize = 0.5;
+				}
+				final boolean topAndBottomMatch = random.nextInt(3) == 0;
+				if (topAndBottomMatch) {
+					final double p2 = random.nextDouble();
+					if (p2 < 0.2) {
+						final double w = random.nextDouble() * 0.08;
+						topSize -= w;
+						bottomSize -= w;
+					}
+					if (random.nextInt(3) == 0) {
+						final Color color2 = getRandomColor(usedColorIndices).color;
+						flag.addHorizontalStripe(1 - bottomSize - 0.03, 1, color2);
+						flag.addHorizontalStripe(0, topSize + 0.03, color2);
+					}
 				}
 				Color color = getRandomColor(usedColorIndices).color;
-				flag.addHorizontalStripe(0, 0.33, color);
-				if (random.nextInt(3) != 0) {
+				flag.addHorizontalStripe(0, topSize, color);
+				if (!topAndBottomMatch) {
 					color = getRandomColor(usedColorIndices).color;
 				}
-				flag.addHorizontalStripe(0.67, 1, color);
+				flag.addHorizontalStripe(1 - bottomSize, 1, color);
 				if (random.nextInt(10) < 2) {
 					final double midX = (random.nextInt(2) + 4) / 10.0;
 					flag.addTriangle(Flag.Alignment.LEFT, 0, 1, midX, 0.5, getRandomColor(usedColorIndices).color);
@@ -152,12 +171,14 @@ public class FlagGenerator extends JPanel {
 				flag.addCircle(0.5, 0.5, 0.5, getRandomColor(usedColorIndices).color);
 			}
 			case THREE_VERTICAL_STRIPES -> {
+				double topSize = 0.33;
+				double bottomSize = 0.33;
 				Color color = getRandomColor(usedColorIndices).color;
-				flag.addVerticalStripe(0, 0.33, color);
+				flag.addVerticalStripe(0, topSize, color);
 				if (random.nextInt(3) != 0) {
 					color = getRandomColor(usedColorIndices).color;
 				}
-				flag.addVerticalStripe(0.67, 1, color);
+				flag.addVerticalStripe(1 - bottomSize, 1, color);
 			}
 			case NORDIC_CROSS -> {
 				double crossWidth = 0.08 + random.nextDouble() * 0.04;
